@@ -77,12 +77,20 @@ module Vizkit
     end
 
     class TaskSortFilterProxyModel < Qt::SortFilterProxyModel
+        def filter_loggers(toggle)
+            @filter_loggers = toggle
+        end
+        def filter_pre_operational(toggle)
+            @filter_pre_operational = toggle
+        end
         def filterAcceptsRow(source_row, source_parent)
             source_index = sourceModel.index(source_row, 0, source_parent)
             return false unless source_index.isValid
             item = sourceModel.itemFromIndex(source_index)
-            if item.is_a?(Vizkit::TaskContextItem) && !filterRegExp.pattern.nil?
-                return item.task.basename.include? filterRegExp.pattern
+            if item.is_a?(Vizkit::TaskContextItem)
+                return false if @filter_loggers && item.task.to_async.model.ancestors.any? { |t| t.name == 'logger::Logger' }
+                return false if @filter_pre_operational && item.task.to_async.state == :PRE_OPERATIONAL
+                return item.task.basename.include? filterRegExp.pattern unless filterRegExp.pattern.nil?
             end
             return true
         end

@@ -73,6 +73,16 @@ class TaskInspector
             menubar.hide
         end
 
+        def filter_loggers(toggle)
+            proxyModel.filter_loggers(toggle)
+            proxyModel.invalidate
+        end
+
+        def filter_pre_operational(toggle)
+            proxyModel.filter_pre_operational(toggle)
+            proxyModel.invalidate
+        end
+
         def add_task(task,options=Hash.new)
             obj = if task.is_a? String
                       Orocos::Async.proxy task
